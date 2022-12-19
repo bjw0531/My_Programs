@@ -26,6 +26,7 @@ def resource_path(relative_path):
         os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
+
 # 변수 선언
 form = resource_path("main.ui")
 form_class = uic.loadUiType(form)[0]
@@ -115,11 +116,11 @@ class recordThread(QThread):
 
             start = time.time()
 
-        def onelinewrite(path,text):
-            f = open(filename,'a')
+        def onelinewrite(path, text):
+            f = open(filename, 'a')
             f.write(text)
             f.close()
-        
+
         def hms(s):
             hours = s // 3600
             s = s - hours*3600
@@ -136,23 +137,43 @@ class recordThread(QThread):
         while True:
             if recordThreadStopper:
                 listener.stop()
-                onelinewrite(filename,'t'+ hms(round(totaltime))) # 총 소요시간 적기
+                onelinewrite(filename, 't' +
+                             hms(round(totaltime)))  # 총 소요시간 적기
                 break
             time.sleep(0.1)
 
         listener.join()
+
         # listener가 끝나면 혹시 모른 상황에 대비해 lock 끄기
         if getLockState(VK_Capital):
             switchLocks(VK_Capital)
         if getLockState(VK_ScrollLock):
             switchLocks(VK_ScrollLock)
-        
+
         self.is_idle = True
         self.parent.status.setText('대기중...')
         return
 
 
-class locksListener(QThread):
+class capslockListener(QThread):
+    capsdetected = pyqtSignal(bool)
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+
+    def run(self):
+
+        def on_release(key):
+            if key == Key.caps_lock:
+                print(getLockState(VK_Capital))
+
+        listener = Listener(on_release=on_release)
+        listener.daemon = True
+        listener.start()
+
+
+class scrlockListener(QThread):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -161,8 +182,7 @@ class locksListener(QThread):
         while True:
             if getLockState and self.parent.is_idle:
                 pass
-
-
+            time.sleep(0.1)
 
 
 class MyThread(QThread):
@@ -215,9 +235,14 @@ class MyWindow(QMainWindow, form_class):
         self.filepath: QLineEdit
         self.filepath_str = ''
 
+        # 소요시간 라벨
+        self.timeLabel: QLabel
+        self.timeLabel.setText("00시간 00분 00초")
+        self.filetime = ''
+
         # 상태 라벨
         self.status: QLabel
-        self.is_idle = False
+        self.is_idle = True
 
         # AlwaysOnTop
         self.AlwaysOnTop: QCheckBox
@@ -226,7 +251,15 @@ class MyWindow(QMainWindow, form_class):
         # DD 로드하기
         self.DD = windll.LoadLibrary(f"{thisdirpath}/DDHID64.dll")
 
+        # lock listener 쓰기
+        self.capslocklistener = capslockListener(self)
+        self.capslocklistener.start()
+        # self.capslocklistener.capsdetected.connect(self.capsDetected)
+
     def Record(self):
+        if not self.is_idle:
+            return
+
         global recordThreadStopper
         recordThreadStopper = False
         self.recordThread.start()
@@ -237,14 +270,39 @@ class MyWindow(QMainWindow, form_class):
 
     def Load(self):
         self.is_idle = False
-        self.filepath_str = QFileDialog.getOpenFileName(
-            None, '파일을 선택하세요.', os.getenv('HOME'), '텍스트 파일(*.txt)')[0]
+        self.status.setText('로딩중...')
+        try:
+            self.filepath_str = QFileDialog.getOpenFileName(
+                None, '파일을 선택하세요.', os.getenv('HOME'), '텍스트 파일(*.txt)')[0]
+        except:
+            pass
+
+        # 파일이 정상적으로 불러와지지 않았으면 return
+        if self.filepath_str == '':
+            return
+
         self.filepath.setText(self.filepath_str)
+
+        # 파일 맨 마지막줄 구하기
+        with open(self.filepath_str, 'rb') as f:
+            try:
+                f.seek(-2, os.SEEK_END)
+                while f.read(1) != b'\n':
+                    f.seek(-2, os.SEEK_CUR)
+            except OSError:
+                f.seek(0)
+            self.filetime = f.readline().decode()[1:]
+
+        h, m, s = self.filetime.split(':')
+        self.timeLabel.setText(f'{h}시간 {m}분 {s}초')
+
         self.is_idle = True
+        self.status.setText('대기중...')
 
     def Delete(self):
         self.filepath.setText('')
         self.filepath_str = None
+        self.timeLabel.setText("00시간 00분 00초")
 
     def AOT(self):
         if self.AlwaysOnTop.isChecked():
@@ -253,6 +311,9 @@ class MyWindow(QMainWindow, form_class):
         else:
             self.setWindowFlag(Qt.WindowStaysOnTopHint, False)
             self.show()
+
+    # @pyqtSlot(bool)
+    # def capsDetected(self):
 
 
 if __name__ == "__main__":
