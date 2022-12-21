@@ -35,6 +35,28 @@ form_class = uic.loadUiType(form)[0]
 app = QApplication
 recordThreadStopper = False
 thisdirpath = os.path.dirname(os.path.realpath(__file__))
+keydict = {
+    "'!'": "'1'",
+    "'@'": "'2'",
+    "'#'": "'3'",
+    "'$'": "'4'",
+    "'%'": "'5'",
+    "'^'": "'6'",
+    "'&'": "'7'",
+    "'*'": "'8'",
+    "'('": "'9'",
+    "')'": "'0'",
+    "'_'": "'-'",
+    "'+'": "'='",
+    "'|'": "'\\'",
+    '{': "'['",
+    '}': "']'",
+    ':': "';'",
+    '\'"\'': "\"'\"",
+    "'<'": "','",
+    "'>'": "'.'",
+    "'?'": "'/'"
+}
 
 # User32 불러오기
 hllDll = WinDLL("User32.dll")
@@ -55,7 +77,7 @@ classdd = ''
 
 def LoadDD():
     global classdd
-    classdd = windll.LoadLibrary(f"{thisdirpath}/DD94687.64.dll")
+    classdd = windll.LoadLibrary(f"{thisdirpath}/DDHID64.dll")
     time.sleep(2)
     st = classdd.DD_btn(0)  # DD Initialize
 
@@ -246,11 +268,29 @@ class runThread(QThread):
 
             if self.line[0] == 'p':
                 print(f'press {self.value}')
-                classdd.DD_key(key.keyConvert(str(self.value)), 1)
+                try:
+                    if len(self.value) == 3 and keyboard.is_pressed('shift'):
+                        self.value = self.value.lower()
+                        self.value = keydict[self.value]
+
+                    self.tmp = key.keyConvert(self.value)
+                    classdd.DD_key(self.tmp, 1)
+                except Exception as e:
+                    print(f'Error : {e}')
+                    raise
 
             elif self.line[0] == 'r':
                 print(f'release {self.value}')
-                classdd.DD_key(key.keyConvert(str(self.value)), 2)
+                try:
+                    if len(self.value) == 3:
+                        self.value = self.value.lower()
+                        self.value = keydict[self.value]
+
+                    self.tmp = key.keyConvert(self.value)
+                    classdd.DD_key(self.tmp, 2)
+                except Exception as e:
+                    print(f'Error : {e}')
+                    raise
 
             elif self.line[0] == 'w':
                 print(f'wait {self.value}')
@@ -331,10 +371,8 @@ class MyWindow(QMainWindow, form_class):
         # DD 로드하기
         LoadDD()
         time.sleep(0.2)
-        classdd.DD_key(601, 1)
-        classdd.DD_key(601, 2)
-        classdd.DD_key(key.keyConvert("\"'\""), 1)
-        classdd.DD_key(key.keyConvert("\"'\""), 2)
+        classdd.DD_key(605, 1)
+        classdd.DD_key(605, 2)
 
         # lock listener 쓰기
         self.capslocklistener = capslockListener(self)
@@ -371,10 +409,12 @@ class MyWindow(QMainWindow, form_class):
             self.filepath_str = QFileDialog.getOpenFileName(
                 None, '파일을 선택하세요.', os.getenv('HOME'), '텍스트 파일(*.txt)')[0]
         except:
+            self.error.start()
             pass
 
         # 파일이 정상적으로 불러와지지 않았으면 return
         if self.filepath_str == '':
+            self.error.start()
             return
 
         self.filepath.setText(self.filepath_str)

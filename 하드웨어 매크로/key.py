@@ -1,5 +1,18 @@
 from pynput.keyboard import Key, Listener
+from ctypes import *
+import time
+import os
 
+# thisdirpath = os.path.dirname(os.path.realpath(__file__))
+# classdd = windll.LoadLibrary(f"{thisdirpath}/DDHID64.dll")
+# time.sleep(2)
+# st = classdd.DD_btn(0)  # DD Initialize
+
+# if st == 1:
+#     print("OK")
+# else:
+#     print("Error")
+#     exit(101)
 
 keydict = {
     "Key.esc": 100,
@@ -63,12 +76,13 @@ keydict = {
     "'z'": 501,
     "'x'": 502,
     "'c'": 503,
-    "'b'": 504,
-    "'n'": 505,
-    "'m'": 506,
-    "','": 507,
-    "'.'": 508,
-    "'/'": 509,
+    "'v'": 504,
+    "'b'": 505,
+    "'n'": 506,
+    "'m'": 507,
+    "','": 508,
+    "'.'": 509,
+    "'/'": 510,
     "Key.shift_r": 511,
     "Key.ctrl_l": 600,
     "Key.cmd": 601,
@@ -108,3 +122,25 @@ def keyConvert(key):
     if key == "'\\x01'":
         return
     return keydict[key]
+
+# print(keyConvert("'d'"))
+
+# f = open(f'{thisdirpath}/macros/2022.12.21.11.36.48.txt','r')
+
+# line = 0
+# while line != '':
+#     line = f.readline()
+#     if line == '':
+#         break
+
+#     if line[0] == 'p':
+#         tmp = keyConvert(line[1:-1])
+#         print(tmp)
+#         classdd.DD_key(tmp,1)
+#     if line[0] == 'r':
+#         tmp = keyConvert(line[1:-1])
+#         print(tmp)
+#         classdd.DD_key(tmp,2)
+#     if line[0] == 'w':
+#         time.sleep(float(line[1:-1]))
+
