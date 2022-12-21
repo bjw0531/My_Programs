@@ -84,7 +84,7 @@ def LoadDD():
         print("OK")
     else:
         print("Error")
-        exit(101)
+        quit(101)
 
 
 def getLockState(Key):
@@ -253,28 +253,34 @@ class runThread(QThread):
         self.parent = parent
 
     def run(self):
+        self.set = set()
         self.parent.status.setText('실행중...')
         self.parent.is_idle = False
 
         self.f = open(self.parent.filepath_str, 'r')
         self.line = None
         while True:
-            if getLockState(VK_ScrollLock):
-                self.parent.status.setText('일시정지...')
-                while True:
-                    if not getLockState(VK_ScrollLock):
-                        break
-                    time.sleep(0.1)
-                self.parent.status.setText('실행중...')
-
             self.line = self.f.readline()
             if self.line == '':
                 break
 
+            if getLockState(VK_ScrollLock):
+                self.parent.status.setText('일시정지...')
+
+                for i in self.set:
+                    classdd.DD_key(key.keydict[i], 2)
+
+                while True:
+                    if not getLockState(VK_ScrollLock):
+                        self.parent.status.setText('실행중...')
+                        break
+                    time.sleep(0.1)
+
             self.value = self.line[1:-1]
 
             if self.line[0] == 'p':
-                print(f'press {self.value}')
+                self.set.add(self.value)
+                print(f'press {self.set}')
                 try:
                     self.value = key.keydict[self.value]
                     classdd.DD_key(self.value, 1)
@@ -284,6 +290,7 @@ class runThread(QThread):
                     raise
 
             elif self.line[0] == 'r':
+                self.set.remove(self.value)
                 print(f'release {self.value}')
                 try:
                     self.value = key.keydict[self.value]
