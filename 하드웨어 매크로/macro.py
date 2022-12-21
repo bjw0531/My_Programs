@@ -78,7 +78,6 @@ classdd = ''
 def LoadDD():
     global classdd
     classdd = windll.LoadLibrary(f"{thisdirpath}/DDHID64.dll")
-    time.sleep(2)
     st = classdd.DD_btn(0)  # DD Initialize
 
     if st == 1:
@@ -94,7 +93,7 @@ def getLockState(Key):
     VK_Capital
     VK_ScrollLock
     """
-    return hllDll.GetKeyState(Key)
+    return onoff[hllDll.GetKeyState(Key)]
 
 
 def switchLocks(Key):
@@ -260,6 +259,14 @@ class runThread(QThread):
         self.f = open(self.parent.filepath_str, 'r')
         self.line = None
         while True:
+            if getLockState(VK_ScrollLock):
+                self.parent.status.setText('일시정지...')
+                while True:
+                    if not getLockState(VK_ScrollLock):
+                        break
+                    time.sleep(0.1)
+                self.parent.status.setText('실행중...')
+
             self.line = self.f.readline()
             if self.line == '':
                 break
@@ -269,12 +276,9 @@ class runThread(QThread):
             if self.line[0] == 'p':
                 print(f'press {self.value}')
                 try:
-                    if len(self.value) == 3 and keyboard.is_pressed('shift'):
-                        self.value = self.value.lower()
-                        self.value = keydict[self.value]
+                    self.value = key.keydict[self.value]
+                    classdd.DD_key(self.value, 1)
 
-                    self.tmp = key.keyConvert(self.value)
-                    classdd.DD_key(self.tmp, 1)
                 except Exception as e:
                     print(f'Error : {e}')
                     raise
@@ -282,12 +286,9 @@ class runThread(QThread):
             elif self.line[0] == 'r':
                 print(f'release {self.value}')
                 try:
-                    if len(self.value) == 3:
-                        self.value = self.value.lower()
-                        self.value = keydict[self.value]
+                    self.value = key.keydict[self.value]
+                    classdd.DD_key(self.value, 2)
 
-                    self.tmp = key.keyConvert(self.value)
-                    classdd.DD_key(self.tmp, 2)
                 except Exception as e:
                     print(f'Error : {e}')
                     raise
