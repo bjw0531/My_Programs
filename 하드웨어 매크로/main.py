@@ -9,11 +9,14 @@ time.sleep(2)
 st = dd_dll.DD_btn(0)  # DD Initialize
 if st == 1:
     print("OK")
+    time.sleep(0.2)
+    dd_dll.DD_key(601, 1)
+    dd_dll.DD_key(601, 2)
 else:
     print("Error")
     exit(101)
 
-
+time.sleep(100)
 print("Keyboard Left win")
 # LWin is 601 in ddcode, 1=down, 2=up.
 dd_dll.DD_key(601, 1)

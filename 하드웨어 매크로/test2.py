@@ -1,52 +1,41 @@
-from multiprocessing import Process, Value, Array
 from pynput.keyboard import Key, Listener
-from threading import Thread
-import time
+from pynput.keyboard._win32 import KeyCode
 from datetime import datetime
+import os
+import time
 
+thisdirpath = os.path.dirname(os.path.realpath(__file__))
+
+global now
 now = datetime.now()
-filename = f"{now.year}.{now.month}.{now.day}.{now.hour}.{now.minute}.{now.second}.txt"
-
-global key
-
-
-def f():
-    listener = Listener()
-    listener.daemon = True
-    listener.start()
-    if key == True:
+filename = f'{thisdirpath}/macros/{now.year}.{now.month}.{now.day}.{now.hour}.{now.minute}.{now.second}.txt'
+f = open(
+    f'{filename}', 'a')
+f.close()
+global totaltime
+totaltime = 0
 
 
 def on_press(key):
-    global end, start
+    global end, start, totaltime
     end = time.time()
-    timedelta = end - start
+    delta = end - start
+    totaltime += delta
 
-    with open(f'./macros/{filename}', 'a') as f:
-        f.write(f'w{timedelta:.3f}\n')
+    with open(f'{filename}', 'a') as f:
+        f.write(f'w{delta:.3f}\n')
         f.write(f'p{key}\n')
 
-    print(f'{key} pressed')
     start = time.time()
 
 
 def on_release(key):
-    global end, start
-    end = time.time()
-    timedelta = end - start
-
-    with open(f'./macros/{filename}', 'a') as f:
-        f.write(f'w{timedelta:.3f}\n')
+    print(str(type(key)))
+    with open(f'{filename}', 'a') as f:
         f.write(f'r{key}\n')
 
-    print(f'{key} release')
-    start = time.time()
 
-
-T = Thread(target=f)
-T.start()
-with Thread(target=f) as T:
-    listener = Listener()
-    listener.daemon = True
-    listener.start()
-    T.join()
+KeyCode.
+listener = Listener(on_release=on_release)
+listener.start()
+time.sleep(1000)

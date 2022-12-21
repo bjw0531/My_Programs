@@ -18,6 +18,8 @@ from pynput import keyboard
 from threading import Thread
 from multiprocessing import Process
 import multiprocessing
+import key
+import debugpy
 
 
 def resource_path(relative_path):
@@ -42,6 +44,26 @@ VK_Capital = 0x14
 VK_ScrollLock = 0x91
 start = 0
 end = 0
+onoff = {65409: True,
+         65408: False,
+         1: True,
+         0: False}
+donerun = False
+
+classdd = ''
+
+
+def LoadDD():
+    global classdd
+    classdd = windll.LoadLibrary(f"{thisdirpath}/DD94687.64.dll")
+    time.sleep(2)
+    st = classdd.DD_btn(0)  # DD Initialize
+
+    if st == 1:
+        print("OK")
+    else:
+        print("Error")
+        exit(101)
 
 
 def getLockState(Key):
@@ -163,41 +185,99 @@ class capslockListener(QThread):
         self.parent = parent
 
     def run(self):
-
         def on_release(key):
             if key == Key.caps_lock:
                 print(getLockState(VK_Capital))
+                self.capsdetected.emit(getLockState(VK_Capital))
 
-        listener = Listener(on_release=on_release)
-        listener.daemon = True
-        listener.start()
+        self.listener = Listener(on_release=on_release)
+        self.listener.daemon = True
+        self.listener.start()
+        self.running = True
+
+    def quit(self):
+        self.running = False
+        self.listener.stop()
 
 
 class scrlockListener(QThread):
+    scrldetected = pyqtSignal(bool)
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
 
     def run(self):
-        while True:
-            if getLockState and self.parent.is_idle:
-                pass
-            time.sleep(0.1)
+        def on_release(key):
+            if key == Key.scroll_lock:
+                print(getLockState(VK_ScrollLock))
+                self.scrldetected.emit(getLockState(VK_ScrollLock))
+
+        listener = Listener(on_release=on_release)
+        listener.daemon = True
+        listener.start()
+        self.running = True
+
+    def quit(self):
+        self.running = False
+        self.listener.stop()
 
 
-class MyThread(QThread):
-    finished = pyqtSignal()
+class runThread(QThread):
+    # debugpy.debug_this_thread()
+    done = pyqtSignal(bool)
 
-    def __init__(self):
-        super().__init__()
-
-    def on_press(self, key):
-        if key == keyboard.Key.f5:
-            self.finished.emit()
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
 
     def run(self):
-        with keyboard.Listener(on_press=self.on_press) as listener:
-            listener.join()
+        self.parent.status.setText('실행중...')
+        self.parent.is_idle = False
+
+        self.f = open(self.parent.filepath_str, 'r')
+        self.line = None
+        while True:
+            self.line = self.f.readline()
+            if self.line == '':
+                break
+
+            self.value = self.line[1:-1]
+
+            if self.line[0] == 'p':
+                print(f'press {self.value}')
+                classdd.DD_key(key.keyConvert(str(self.value)), 1)
+
+            elif self.line[0] == 'r':
+                print(f'release {self.value}')
+                classdd.DD_key(key.keyConvert(str(self.value)), 2)
+
+            elif self.line[0] == 'w':
+                print(f'wait {self.value}')
+                time.sleep(float(self.value))
+
+        self.f.close()
+
+        self.parent.status.setText('대기중...')
+        self.parent.is_idle = True
+
+        if getLockState(VK_Capital):
+            switchLocks(VK_Capital)
+
+        self.done.emit(True)
+
+
+class errorThread(QThread):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+
+    def run(self):
+        self.parent.is_idle = False
+        self.parent.status.setText('오류!')
+        time.sleep(1)
+        self.parent.status.setText('대기중...')
+        self.parent.is_idle = True
 
 
 class MyWindow(QMainWindow, form_class):
@@ -249,12 +329,25 @@ class MyWindow(QMainWindow, form_class):
         self.AlwaysOnTop.stateChanged.connect(self.AOT)
 
         # DD 로드하기
-        self.DD = windll.LoadLibrary(f"{thisdirpath}/DDHID64.dll")
+        LoadDD()
+        time.sleep(0.2)
+        classdd.DD_key(601, 1)
+        classdd.DD_key(601, 2)
+        classdd.DD_key(key.keyConvert("\"'\""), 1)
+        classdd.DD_key(key.keyConvert("\"'\""), 2)
 
         # lock listener 쓰기
         self.capslocklistener = capslockListener(self)
         self.capslocklistener.start()
-        # self.capslocklistener.capsdetected.connect(self.capsDetected)
+        self.capslocklistener.capsdetected.connect(self.capsDetected)
+
+        self.scrlocklistener = scrlockListener(self)
+        self.scrlocklistener.start()
+
+        self.runthread = runThread(self)
+        self.runthread.done.connect(self.donerunning)
+
+        self.error = errorThread(self)
 
     def Record(self):
         if not self.is_idle:
@@ -263,10 +356,13 @@ class MyWindow(QMainWindow, form_class):
         global recordThreadStopper
         recordThreadStopper = False
         self.recordThread.start()
+        self.capslocklistener.quit()
 
     def StopSave(self):
         global recordThreadStopper
         recordThreadStopper = True
+        if not self.capslocklistener.running:
+            self.capslocklistener.start()
 
     def Load(self):
         self.is_idle = False
@@ -293,8 +389,11 @@ class MyWindow(QMainWindow, form_class):
                 f.seek(0)
             self.filetime = f.readline().decode()[1:]
 
-        h, m, s = self.filetime.split(':')
-        self.timeLabel.setText(f'{h}시간 {m}분 {s}초')
+        try:
+            h, m, s = self.filetime.split(':')
+            self.timeLabel.setText(f'{h}시간 {m}분 {s}초')
+        except:
+            self.error.start()
 
         self.is_idle = True
         self.status.setText('대기중...')
@@ -303,6 +402,9 @@ class MyWindow(QMainWindow, form_class):
         self.filepath.setText('')
         self.filepath_str = None
         self.timeLabel.setText("00시간 00분 00초")
+        time.sleep(1)
+        classdd.DD_key(401, 1)
+        classdd.DD_key(401, 2)
 
     def AOT(self):
         if self.AlwaysOnTop.isChecked():
@@ -312,8 +414,19 @@ class MyWindow(QMainWindow, form_class):
             self.setWindowFlag(Qt.WindowStaysOnTopHint, False)
             self.show()
 
-    # @pyqtSlot(bool)
-    # def capsDetected(self):
+    @ pyqtSlot(bool)
+    def capsDetected(self, value):
+        if not self.filepath_str:
+            return
+
+        if self.is_idle and value:
+            self.capslocklistener.quit()
+            self.runthread.start()
+
+    @ pyqtSlot(bool)
+    def donerunning(self, value):
+        if not self.capslocklistener.running:
+            self.capslocklistener.start()
 
 
 if __name__ == "__main__":
