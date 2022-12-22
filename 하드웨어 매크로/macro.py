@@ -264,18 +264,6 @@ class runThread(QThread):
             if self.line == '':
                 break
 
-            if getLockState(VK_ScrollLock):
-                self.parent.status.setText('일시정지...')
-
-                for i in self.set:
-                    classdd.DD_key(key.keydict[i], 2)
-
-                while True:
-                    if not getLockState(VK_ScrollLock):
-                        self.parent.status.setText('실행중...')
-                        break
-                    time.sleep(0.1)
-
             self.value = self.line[1:-1]
 
             if self.line[0] == 'p':
@@ -297,6 +285,21 @@ class runThread(QThread):
                         self.set.remove(self.tmp)
                     print(f'release {self.tmp}')
                     classdd.DD_key(self.tmp, 2)
+                    if not getLockState(VK_Capital):
+                        for i in self.set:
+                            classdd.DD_key(i, 2)
+                        break
+                    if getLockState(VK_ScrollLock):
+                        self.parent.status.setText('일시정지...')
+
+                        for i in self.set:
+                            classdd.DD_key(i, 2)
+
+                        while True:
+                            if not getLockState(VK_ScrollLock):
+                                self.parent.status.setText('실행중...')
+                                break
+                            time.sleep(0.1)
 
                 except Exception as e:
                     print(f'Error : {e}')
@@ -396,6 +399,30 @@ class MyWindow(QMainWindow, form_class):
         self.runthread.done.connect(self.donerunning)
 
         self.error = errorThread(self)
+        # 파일 불러오기
+        try:
+            with open('config', 'r', encoding='EUC-KR') as f:
+                line = f.readline()
+                if 'txt' in line:
+                    self.filepath_str = line
+                    self.filepath.setText(self.filepath_str)
+
+                with open(self.filepath_str, 'rb') as f:
+                    try:
+                        f.seek(-2, os.SEEK_END)
+                        while f.read(1) != b'\n':
+                            f.seek(-2, os.SEEK_CUR)
+                    except OSError:
+                        f.seek(0)
+                    self.filetime = f.readline().decode()[1:]
+
+                try:
+                    h, m, s = self.filetime.split(':')
+                    self.timeLabel.setText(f'{h}시간 {m}분 {s}초')
+                except:
+                    self.error.start()
+        except:
+            pass
 
     def Record(self):
         if not self.is_idle:
@@ -445,10 +472,17 @@ class MyWindow(QMainWindow, form_class):
         except:
             self.error.start()
 
+        # config에 쓰기
+        with open('config', 'w', encoding="EUC-KR") as f:
+            f.write(self.filepath_str)
+
         self.is_idle = True
         self.status.setText('대기중...')
 
     def Delete(self):
+        with open('config', 'w', encoding="EUC-KR") as f:
+            pass
+
         self.filepath.setText('')
         self.filepath_str = None
         self.timeLabel.setText("00시간 00분 00초")
@@ -470,7 +504,6 @@ class MyWindow(QMainWindow, form_class):
             return
 
         if self.is_idle and value:
-            self.capslocklistener.quit()
             self.runthread.start()
 
     @ pyqtSlot(bool)

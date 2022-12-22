@@ -8,7 +8,7 @@ a = Analysis(
     ['macro.py'],
     pathex=[],
     binaries=[],
-    datas=[('main.ui','.'),('DDHID64.dll','.')],
+    datas=[('main.ui','.'),('DDHID64.dll','.'),('config','.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
