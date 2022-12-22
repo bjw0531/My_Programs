@@ -279,22 +279,24 @@ class runThread(QThread):
             self.value = self.line[1:-1]
 
             if self.line[0] == 'p':
-                self.set.add(self.value)
-                print(f'press {self.set}')
                 try:
-                    self.value = key.keydict[self.value]
-                    classdd.DD_key(self.value, 1)
+                    self.tmp = key.keydict[self.value]
+                    if self.tmp not in self.set:
+                        self.set.add(self.tmp)
+                        print(f'press {self.set}')
+                        classdd.DD_key(self.tmp, 1)
 
                 except Exception as e:
                     print(f'Error : {e}')
                     raise
 
             elif self.line[0] == 'r':
-                self.set.remove(self.value)
-                print(f'release {self.value}')
                 try:
-                    self.value = key.keydict[self.value]
-                    classdd.DD_key(self.value, 2)
+                    self.tmp = key.keydict[self.value]
+                    if self.tmp in self.set:
+                        self.set.remove(self.tmp)
+                    print(f'release {self.tmp}')
+                    classdd.DD_key(self.tmp, 2)
 
                 except Exception as e:
                     print(f'Error : {e}')
