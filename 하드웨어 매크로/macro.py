@@ -84,7 +84,7 @@ def LoadDD():
         print("OK")
     else:
         print("Error")
-        quit(101)
+        exit(101)
 
 
 def getLockState(Key):
