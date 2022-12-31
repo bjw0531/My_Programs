@@ -77,7 +77,7 @@ classdd = ''
 
 def LoadDD():
     global classdd
-    classdd = windll.LoadLibrary(f"{thisdirpath}/DDHID64.dll")
+    classdd = windll.LoadLibrary(f"{thisdirpath}/DD94687.64.dll")
     st = classdd.DD_btn(0)  # DD Initialize
 
     if st == 1:

@@ -8,7 +8,7 @@ a = Analysis(
     ['macro.py'],
     pathex=[],
     binaries=[],
-    datas=[('main.ui','.'),('DDHID64.dll','.'),('config','.')],
+    datas=[('main.ui','.'),('DDHID64.dll','.'),('config','.'),('Driver installer win10','.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
