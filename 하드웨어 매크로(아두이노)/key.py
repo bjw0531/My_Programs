@@ -1,0 +1,180 @@
+from pynput.keyboard import Key, Listener
+from ctypes import *
+import time
+import os
+
+keydict = {
+    "Key.esc": '0xB1',
+    "Key.f1": '0xC2',
+    "Key.f2": '0xC3',
+    "Key.f3": '0xC4',
+    "Key.f4": '0xC5',
+    "Key.f5": '0xC6',
+    "Key.f6": '0xC7',
+    "Key.f7": '0xC8',
+    "Key.f8": '0xC9',
+    "Key.f9": '0xCA',
+    "Key.f10": '0xCB',
+    "Key.f11": '0xCC',
+    "Key.f12": '0xCD',
+    "Key.print_screen": '0xCE',
+    "Key.scroll_lock": '0xCF',
+    "Key.pause": '0xD0',
+    "'`'": '`',
+    "'~'": '`',
+    "'1'": '1',
+    "'!'": '1',
+    "'2'": '2',
+    "'@'": '2',
+    "'3'": '3',
+    "'#'": '3',
+    "'4'": '4',
+    "'$'": '4',
+    "'5'": '5',
+    "'%'": '5',
+    "'6'": '6',
+    "'^'": '6',
+    "'7'": '7',
+    "'&'": '7',
+    "'8'": '8',
+    "'*'": '8',
+    "'9'": '9',
+    "'('": '9',
+    "'0'": '0',
+    "')'": '0',
+    "'-'": '-',
+    "'_'": '-',
+    "'='": '=',
+    "'+'": '=',
+    "Key.backspace": '0xB2',
+    "Key.tab": '0xB3',
+    "'q'": 'q',
+    "'Q'": 'q',
+    "'w'": 'w',
+    "'W'": 'w',
+    "'e'": 'e',
+    "'E'": 'e',
+    "'r'": 'r',
+    "'R'": 'r',
+    "'t'": 't',
+    "'T'": 't',
+    "'y'": 'y',
+    "'Y'": 'y',
+    "'u'": 'u',
+    "'U'": 'u',
+    "'i'": 'i',
+    "'I'": 'i',
+    "'o'": 'o',
+    "'O'": 'o',
+    "'p'": 'p',
+    "'P'": 'p',
+    "'['": '[',
+    "'{'": '[',
+    "']'": ']',
+    "'}'": ']',
+    "'\\'": '\\',
+    "'\\\\'": '\\',
+    "'|'": '\\',
+    "Key.caps_lock": '0xC1',
+    "'a'": 'a',
+    "'A'": 'a',
+    "'s'": 's',
+    "'S'": 's',
+    "'d'": 'd',
+    "'D'": 'd',
+    "'f'": 'f',
+    "'F'": 'f',
+    "'g'": 'g',
+    "'G'": 'g',
+    "'h'": 'h',
+    "'H'": 'h',
+    "'j'": 'j',
+    "'J'": 'j',
+    "'k'": 'k',
+    "'K'": 'k',
+    "'l'": 'l',
+    "'L'": 'l',
+    "';'": ';',
+    "':'": ';',
+    "\"'\"": "'",
+    "'\"\'": "'",
+    "Key.enter": '0xE0',
+    "Key.shift": '0x81',
+    "'z'": 'z',
+    "'Z'": 'z',
+    "'x'": 'x',
+    "'X'": 'x',
+    "'c'": 'c',
+    "'C'": 'c',
+    "'v'": 'v',
+    "'V'": 'v',
+    "'b'": 'b',
+    "'B'": 'b',
+    "'n'": 'n',
+    "'N'": 'n',
+    "'m'": 'm',
+    "'M'": 'm',
+    "','": ',',
+    "'<'": ',',
+    "'.'": '.',
+    "'>'": '.',
+    "'/'": '/',
+    "'?'": '/',
+    "Key.shift_r": '0x85',
+    "Key.ctrl_l": '0x80',
+    "Key.cmd": '0x83',
+    "Key.alt_l": '0x82',
+    "Key.space": '0x20',
+    "Key.left": '0xD8',
+    "Key.up": '0xDA',
+    "Key.down": '0xD9',
+    "Key.right": '0xD7',
+    "Key.insert": '0xD1',
+    "Key.home": '0xD2',
+    "Key.page_up": '0xD3',
+    "Key.delete": '0xD4',
+    "Key.end": '0xD5',
+    "Key.page_down": '0xD6',
+    "Key.num_lock": '0xDB',
+    "Key.menu": '0xED',
+    # "<96>": 800,
+    # "<97>": 801,
+    # "<98>": 802,
+    # "<99>": 803,
+    # "<100>": 804,
+    # "<101>": 805,
+    # "<102>": 806,
+    # "<103>": 807,
+    # "<104>": 808,
+    # "<105>": 809,
+    # "<110>": 816,
+    "<21>":  "0x86",
+    "<25>": "0x87"
+}
+
+
+def keyConvert(key):
+    if key == "'\\x01'":
+        return
+    return keydict[key]
+
+# print(keyConvert("'d'"))
+
+# f = open(f'{thisdirpath}/macros/2022.12.21.11.36.48.txt','r')
+
+# line = 0
+# while line != '':
+#     line = f.readline()
+#     if line == '':
+#         break
+
+#     if line[0] == 'p':
+#         tmp = keyConvert(line[1:-1])
+#         print(tmp)
+#         classdd.DD_key(tmp,1)
+#     if line[0] == 'r':
+#         tmp = keyConvert(line[1:-1])
+#         print(tmp)
+#         classdd.DD_key(tmp,2)
+#     if line[0] == 'w':
+#         time.sleep(float(line[1:-1]))

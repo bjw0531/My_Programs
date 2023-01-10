@@ -1,0 +1,17 @@
+rKey.end
+rKey.down
+rKey.page_down
+rKey.left
+r<12>
+rKey.right
+rKey.home
+rKey.up
+rKey.page_up
+rKey.num_lock
+r'/'
+r'*'
+r'-'
+r'+'
+rKey.enter
+r<110>
+r<96>

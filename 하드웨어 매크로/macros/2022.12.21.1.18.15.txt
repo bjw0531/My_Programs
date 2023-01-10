@@ -1,0 +1,16 @@
+r<97>
+r<98>
+r<99>
+r<100>
+r<101>
+r<102>
+r<103>
+r<104>
+r<105>
+rKey.num_lock
+r'/'
+r'*'
+r'-'
+r'+'
+rKey.enter
+rKey.delete

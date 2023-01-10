@@ -77,7 +77,7 @@ classdd = ''
 
 def LoadDD():
     global classdd
-    classdd = windll.LoadLibrary(f"{thisdirpath}/DD94687.64.dll")
+    classdd = windll.LoadLibrary(f"{thisdirpath}/DDHID64.dll")
     st = classdd.DD_btn(0)  # DD Initialize
 
     if st == 1:
@@ -136,19 +136,23 @@ class recordThread(QThread):
 
         # 함수 선언
         def on_press(key):
-            global end, start, totaltime
+            global end, start, totaltime, lastinput, currentinput
             end = time.time()
             delta = end - start
             totaltime += delta
 
-            with open(f'{filename}', 'a') as f:
-                f.write(f'w{delta:.3f}\n')
-                f.write(f'p{key}\n')
+            if lastinput == f"p{key}":
+                pass
+            else:
+                with open(f'{filename}', 'a') as f:
+                    f.write(f'w{delta:.3f}\n')
+                    f.write(f'p{key}\n')
+                start = time.time()
 
-            start = time.time()
+            lastinput = f"p{key}"
 
         def on_release(key):
-            global end, start, totaltime
+            global end, start, totaltime, lastinput
             end = time.time()
             delta = end - start
             totaltime += delta
@@ -158,9 +162,10 @@ class recordThread(QThread):
                 f.write(f'r{key}\n')
 
             start = time.time()
+            lastinput = f"r{key}"
 
         def onelinewrite(path, text):
-            f = open(filename, 'a')
+            f = open(path, 'a')
             f.write(text)
             f.close()
 
@@ -173,7 +178,8 @@ class recordThread(QThread):
 
         listener = Listener(on_press=on_press, on_release=on_release)
         listener.start()
-        global start
+        global start, lastinput
+        lastinput = ""
         start = time.time()  # 시작부터 첫키가 눌리기까지 시간
 
         # recordThreadStopper가 True가 되면 정지

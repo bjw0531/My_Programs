@@ -1,0 +1,7 @@
+rKey.ctrl_l
+rKey.tab
+r'n'
+r'o'
+r't'
+r'e'
+rKey.enter

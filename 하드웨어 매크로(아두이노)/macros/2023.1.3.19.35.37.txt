@@ -1,0 +1,17 @@
+w1.552
+pKey.alt_l
+w0.084
+rKey.alt_l
+w3.239
+pKey.cmd
+w0.116
+rKey.cmd
+w3.010
+pKey.shift
+w0.158
+rKey.shift
+w0.655
+pKey.ctrl_l
+w0.155
+rKey.ctrl_l
+t00:00:09

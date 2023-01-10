@@ -1,0 +1,13 @@
+Sub Delete_Row_If_Cell_Contains_String()
+Dim Row As Long
+Dim Wrk As Long
+
+Row = Cells.SpecialCells(xlCellTypeLastCell).Row
+For Wrk = Row To 1 Step -1
+    If IsError(Cells(Wrk, 41)) = False Then
+        If Cells(Wrk, 41) = "품절" Then
+            Rows(Wrk).Delete
+        End If
+    End If
+Next
+End Sub
