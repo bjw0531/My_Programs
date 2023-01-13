@@ -147,6 +147,7 @@ class recordThread(QThread):
         # 파일 만들기
         global now
         now = datetime.now()
+        recordstart = time.time()
         filename = f'{thisdirpath}/macros/{now.year}.{now.month}.{now.day}.{now.hour}.{now.minute}.{now.second}.txt'
         f = open(
             f'{filename}', 'a')
@@ -211,7 +212,7 @@ class recordThread(QThread):
             if recordThreadStopper:
                 listener.stop()
                 onelinewrite(filename, 't' +
-                             hms(round(totaltime)))  # 총 소요시간 적기
+                             hms(round(time.time() - recordstart)))  # 총 소요시간 적기
                 break
             time.sleep(0.1)
 
