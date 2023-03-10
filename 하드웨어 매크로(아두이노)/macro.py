@@ -165,8 +165,8 @@ class recordThread(QThread):
                 pass
             else:
                 with open(f'{filename}', 'a') as f:
-                    if round(delta, 3) < 0.005:
-                        delta = 0.005
+                    if round(delta, 3) < 0.05:
+                        delta = 0.05
                     f.write(f'w{delta:.3f}\n')
                     f.write(f'p{key}\n')
                 start = time.time()
@@ -180,8 +180,8 @@ class recordThread(QThread):
             delta = end - start
 
             with open(f'{filename}', 'a') as f:
-                if round(delta, 3) < 0.005:
-                    delta = 0.005
+                if round(delta, 3) < 0.05:
+                    delta = 0.05
                 f.write(f'w{delta:.3f}\n')
                 f.write(f'r{key}\n')
 
