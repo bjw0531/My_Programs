@@ -5,8 +5,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-gmail_user = 'ljpot7@gmail.com'
-gmail_app_password = 'wxgajyuijifmooyv'
+gmail_user = ''
+gmail_app_password = ''
 title = '안녕하세요'
 text = '내용입니다\n내용입니다'
 
