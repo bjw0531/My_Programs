@@ -19,7 +19,7 @@ import map1
 bg = pygame.image.load('bg2.jpg')
 bg = pygame.transform.scale(bg, (var.BGX, var.BGY))
 screen = pygame.Surface((var.SURFACEX, var.SURFACEY))
-screen.blit(bg, (var.SURFACEMIDX - var.BGX / 2, var.SURFACEMIDY - var.BGY / 2))
+screen.blit(bg, (-var.SURFACEINITX + var.BX, -var.SURFACEINITY + var.BY))
 pathlist = []
 
 
@@ -146,7 +146,7 @@ def midpoint(x, y, mode):
 def make():
     global pathlist
     pathlist.append(
-        path1([var.SURFACEMIDX, var.SURFACEMIDY], 1, 80, var.WHITE, var.BLACK))
+        path1([var.BX, var.BY], 1, 80, var.WHITE, var.BLACK))
 
     for i in range(11):
 

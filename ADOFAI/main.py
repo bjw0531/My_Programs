@@ -20,6 +20,9 @@ import map1
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((var.BGX, var.BGY))
 ballscreen = pygame.Surface((var.SURFACEX, var.SURFACEY))
+ballscreen.set_colorkey(pygame.Color(0, 0, 0))
+tmpscreen = pygame.Surface((1280, 720))
+tmpscreen.fill(var.WHITE)
 degree = 0
 pygame.init()
 
@@ -135,20 +138,20 @@ while run:
     x, y = getxy(degree, mode)
     pathrect = map1.pathrect(nextpath)
 
-    # pathscreen, endpathidx = map1.map()
-    # screen.blit(pathscreen, (-var.SURFACEX + var.BGX +
-    #             xoffset, -var.SURFACEY + var.BGY + yoffset))
-    pygame.draw.rect(ballscreen, var.RED, (0, 0, 8720+640, 9280+360))
-    screen.blit(ballscreen, (-8720, -9280))
+    pathscreen, endpathidx = map1.map()
+
+    screen.blit(pathscreen, (var.SURFACEINITX+1280, var.SURFACEINITY+720))
+    screen.blit(ballscreen, (var.SURFACEINITX, var.SURFACEINITY))
+    # pygame.draw.rect(ballscreen, var.WHITE, (0, 0, 2560, 1440))
 
     spinrect = pygame.draw.circle(
-        ballscreen, col1, [8720+640 + x, 9280+360 + y], var.RADIUS)
+        ballscreen, col1, [-var.SURFACEINITX + var.BX + x, -var.SURFACEINITY + var.BY + y], var.RADIUS)
 
     # 공 그리기
-    pygame.gfxdraw.aacircle(ballscreen, 8720+640,
-                            9280+360, var.RADIUS, col2)
+    pygame.gfxdraw.aacircle(ballscreen, -var.SURFACEINITX + var.BX,
+                            -var.SURFACEINITY + var.BY, var.RADIUS, col2)
     pygame.gfxdraw.filled_circle(
-        ballscreen, 8720+640,  9280+360, var.RADIUS, col2)
+        ballscreen, -var.SURFACEINITX + var.BX, -var.SURFACEINITY + var.BY, var.RADIUS, col2)
 
     # rotation
     degree += 3
