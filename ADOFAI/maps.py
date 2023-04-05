@@ -17,16 +17,17 @@ import variables as var
 
 bg = pygame.image.load('bg2.jpg')
 bg = pygame.transform.scale(bg, (var.BGX, var.BGY))
-screen = pygame.Surface((22360, 22360))
+screen = pygame.Surface((var.SURFACEX, var.SURFACEY))
 # screen.set_colorkey(var.BLACK)
 screen.blit(bg, (-var.SURFACEINITX + var.BX, -var.SURFACEINITY + var.BY))
 pathlist = []
 
 
 class path:
-    def __init__(self, start, offset, col1, col2, direction):
+    def __init__(self, start, offset, col1, col2, direction, fpsset=0):
         xoffsets = [0, offset, 0, -offset, 0]
         yoffsets = [0, 0, offset, 0, -offset]
+        self.fpsset = fpsset
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.subrect = pygame.Rect(0, 0, 0, 0)
         self.direction = direction
@@ -82,20 +83,6 @@ def automake(l: list):
         makepath(var.OFFSET, i, var.WHITE, var.BLACK)
 
 
-def make():
-    #   4
-    # 3 □ 1
-    #   2
-    global pathlist
-    pathlist.append(
-        path([var.SURFACEX / 2, var.SURFACEY / 2], 80, var.WHITE, var.BLACK, 1))
-
-    pattern1 = [1, 1, 1, 1, 2, 2, 2, 2]
-
-    automake(pattern1+pattern1+pattern1 +
-             [1, 1, 1, 1, 1]+[4, 4, 4]+pattern1+pattern1+pattern1+[1, 1, 1, 1]+[4, 4, 4, 4]+[1, 1, 1, 1, 1, 1, 1, 1, 1])
-
-
 def makepath(offset, direction, col1, col2):
 
     try:
@@ -109,7 +96,7 @@ def makepath(offset, direction, col1, col2):
     pathlist.append(path(directrect.center, offset, col1, col2, direction))
 
 
-def map():
+def make():
     for i in pathlist:
         i.draw()
     endpathidx = len(pathlist)
@@ -118,3 +105,17 @@ def map():
 
 def get_path(idx):
     return pathlist[idx]
+
+
+def map2():
+    #   4
+    # 3 □ 1
+    #   2
+    global pathlist
+    pathlist.append(
+        path([var.SURFACEX / 2, var.SURFACEY / 2], 80, var.WHITE, var.BLACK, 1))
+
+    pattern1 = [1, 1, 1, 1, 2, 2, 2, 2]
+
+    automake(pattern1+pattern1+pattern1 +
+             [1, 1, 1, 1, 1]+[4, 4, 4]+pattern1+pattern1+pattern1+[1, 1, 1, 1]+[4, 4, 4, 4]+[1, 1, 1, 1, 1, 1, 1, 1, 1])

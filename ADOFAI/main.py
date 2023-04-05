@@ -14,7 +14,7 @@ from pygame.surface import Surface
 import pygame.gfxdraw
 
 import variables as var
-import map1
+import maps
 
 
 clock = pygame.time.Clock()
@@ -37,8 +37,7 @@ font2 = pygame.font.SysFont("dotum", 25, False, True)
 gameovertxt = font.render("Game Over", True, var.RED)
 gamecleartxt = font.render("Game Clear", True, var.GREEN)
 
-
-map1.make()
+maps.map2()
 
 
 def getxy(degree, mode):
@@ -92,9 +91,9 @@ nextpath = 1
 xoffset = 0
 yoffset = 0
 # pathlist.append(path([var.BX, var.BY], 1, 1))
-pathscreen, endpathidx = map1.map()
 spinrect = Rect(0, 0, 0, 0)
 pathpos = Rect(0, 0, 0, 0)
+pathscreen, endpathidx = maps.make()
 
 
 while run:
@@ -107,13 +106,13 @@ while run:
     # hit keyboard
     if key == userinput[0] or key == userinput[1]:
 
-        direction = map1.get_path(nextpath).direction
+        direction = maps.get_path(nextpath).direction
         flag = False
 
         if direction > 0:
-            pygame.draw.rect(screen, var.RED, map1.midpoint(
+            pygame.draw.rect(screen, var.RED, maps.midpoint(
                 screen.get_rect().centerx, screen.get_rect().centery, direction))
-            if not spinrect.colliderect(map1.midpoint(screen.get_rect().centerx, screen.get_rect().centery, direction)):
+            if not spinrect.colliderect(maps.midpoint(screen.get_rect().centerx, screen.get_rect().centery, direction)):
                 gameover(0)
                 flag = True
 
@@ -132,17 +131,15 @@ while run:
             col1 = colorchanger(col1)
             col2 = colorchanger(col2)
             degree -= 180
-            xoffset += map1.get_path(nextpath).xoffset
-            yoffset += map1.get_path(nextpath).yoffset
+            xoffset += maps.get_path(nextpath).xoffset
+            yoffset += maps.get_path(nextpath).yoffset
             nextpath += 1
         else:
             flag = False
 
     # draw ball
     x, y = getxy(degree, mode)
-    pathrect = map1.pathrect(nextpath)
-
-    pathscreen, endpathidx = map1.map()
+    pathrect = maps.pathrect(nextpath)
 
     screen.blit(pathscreen, (-((var.SURFACEX-var.BGX) / 2) +
                 xoffset, -((var.SURFACEY-var.BGY) / 2)+yoffset))
