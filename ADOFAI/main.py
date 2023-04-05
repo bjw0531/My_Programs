@@ -19,8 +19,6 @@ import map1
 
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((var.BGX, var.BGY))
-ballscreen = pygame.Surface((var.SURFACEX, var.SURFACEY))
-ballscreen.set_colorkey(pygame.Color(0, 0, 0))
 tmpscreen = pygame.Surface((1280, 720))
 tmpscreen.fill(var.WHITE)
 degree = 0
@@ -37,6 +35,8 @@ pathlist = []
 font = pygame.font.SysFont("dotum", 60, True, True)
 font2 = pygame.font.SysFont("dotum", 25, False, True)
 gameovertxt = font.render("Game Over", True, var.RED)
+gamecleartxt = font.render("Game Clear", True, var.GREEN)
+
 
 map1.make()
 
@@ -58,11 +58,15 @@ def colorchanger(col):
         return var.RED
 
 
-def gameover():
+def gameover(mode):
     replay = 0
     while not replay:
-        screen.blit(
-            gameovertxt, [screen.get_rect().centerx - gameovertxt.get_rect().centerx, screen.get_rect().centery-200])
+        if mode == 0:   # game over
+            screen.blit(
+                gameovertxt, [screen.get_rect().centerx - gameovertxt.get_rect().centerx, screen.get_rect().centery-200])
+        if mode == 1:   # game clear
+            screen.blit(
+                gamecleartxt, [screen.get_rect().centerx - gamecleartxt.get_rect().centerx, screen.get_rect().centery-200])
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -107,14 +111,14 @@ while run:
         flag = False
 
         if direction > 0:
-            pygame.draw.rect(ballscreen, var.RED, map1.midpoint(
-                var.BX, var.BY, direction))
-            if not spinrect.colliderect(map1.midpoint(var.BX, var.BY, direction)):
-                gameover()
+            pygame.draw.rect(screen, var.RED, map1.midpoint(
+                screen.get_rect().centerx, screen.get_rect().centery, direction))
+            if not spinrect.colliderect(map1.midpoint(screen.get_rect().centerx, screen.get_rect().centery, direction)):
+                gameover(0)
                 flag = True
 
         if nextpath + 1 == endpathidx:
-            gameover()
+            gameover(1)
             flag = True
 
         if key == userinput[0]:
@@ -140,18 +144,22 @@ while run:
 
     pathscreen, endpathidx = map1.map()
 
-    screen.blit(pathscreen, (var.SURFACEINITX+1280, var.SURFACEINITY+720))
-    screen.blit(ballscreen, (var.SURFACEINITX, var.SURFACEINITY))
-    # pygame.draw.rect(ballscreen, var.WHITE, (0, 0, 2560, 1440))
+    screen.blit(pathscreen, (-((var.SURFACEX-var.BGX) / 2) +
+                xoffset, -((var.SURFACEY-var.BGY) / 2)+yoffset))
 
     spinrect = pygame.draw.circle(
-        ballscreen, col1, [-var.SURFACEINITX + var.BX + x, -var.SURFACEINITY + var.BY + y], var.RADIUS)
+        screen, col1, [screen.get_rect().centerx + x, screen.get_rect().centery + y], var.RADIUS)
+
+    # pygame.draw.rect(screen, var.WHITE, spinrect)
 
     # 공 그리기
-    pygame.gfxdraw.aacircle(ballscreen, -var.SURFACEINITX + var.BX,
-                            -var.SURFACEINITY + var.BY, var.RADIUS, col2)
+    pygame.gfxdraw.aacircle(screen, screen.get_rect().centerx,
+                            screen.get_rect().centery, var.RADIUS, col2)
     pygame.gfxdraw.filled_circle(
-        ballscreen, -var.SURFACEINITX + var.BX, -var.SURFACEINITY + var.BY, var.RADIUS, col2)
+        screen, screen.get_rect().centerx, screen.get_rect().centery, var.RADIUS, col2)
+    coord = font.render(
+        f"{640-xoffset}, {360-yoffset}", True, var.RED)
+    # screen.blit(coord, [screen.get_rect().centerx, screen.get_rect().centery])
 
     # rotation
     degree += 3
