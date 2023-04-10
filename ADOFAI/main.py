@@ -19,8 +19,6 @@ import maps
 
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((var.BGX, var.BGY))
-tmpscreen = pygame.Surface((1280, 720))
-tmpscreen.fill(var.WHITE)
 degree = 0
 pygame.init()
 
@@ -37,7 +35,7 @@ font2 = pygame.font.SysFont("dotum", 25, False, True)
 gameovertxt = font.render("Game Over", True, var.RED)
 gamecleartxt = font.render("Game Clear", True, var.GREEN)
 
-maps.map2()
+soundtrack = maps.map2()
 
 
 def getxy(degree, mode):
@@ -79,6 +77,8 @@ def gameover(mode):
                     nextpath = 1
                     xoffset = 0
                     yoffset = 0
+                    if (maps.get_path(0).fpsset):
+                        var.FPS = maps.get_path(0).fpsset
 
                     return
 
@@ -93,6 +93,7 @@ yoffset = 0
 # pathlist.append(path([var.BX, var.BY], 1, 1))
 spinrect = Rect(0, 0, 0, 0)
 pathpos = Rect(0, 0, 0, 0)
+pathidxscreen = maps.makeidx()
 pathscreen, endpathidx = maps.make()
 
 
@@ -116,6 +117,7 @@ while run:
                 gameover(0)
                 flag = True
 
+        # hit block
         if nextpath + 1 == endpathidx:
             gameover(1)
             flag = True
@@ -130,9 +132,19 @@ while run:
         if flag == False:
             col1 = colorchanger(col1)
             col2 = colorchanger(col2)
-            degree -= 180
-            xoffset += maps.get_path(nextpath).xoffset
-            yoffset += maps.get_path(nextpath).yoffset
+            tmppath = maps.get_path(nextpath)
+            xoffset += tmppath.xoffset
+            yoffset += tmppath.yoffset
+            if (tmppath.fpsset):
+                var.FPS = tmppath.fpsset
+            if tmppath.direction == 1:
+                degree = 0
+            elif tmppath.direction == 2:
+                degree = 90
+            elif tmppath.direction == 3:
+                degree = 180
+            elif tmppath.direction == 4:
+                degree = 270
             nextpath += 1
         else:
             flag = False
@@ -143,6 +155,8 @@ while run:
 
     screen.blit(pathscreen, (-((var.SURFACEX-var.BGX) / 2) +
                 xoffset, -((var.SURFACEY-var.BGY) / 2)+yoffset))
+    screen.blit(pathidxscreen, (-((var.SURFACEX-var.BGX) / 2) +
+                                xoffset, -((var.SURFACEY-var.BGY) / 2)+yoffset))
 
     spinrect = pygame.draw.circle(
         screen, col1, [screen.get_rect().centerx + x, screen.get_rect().centery + y], var.RADIUS)

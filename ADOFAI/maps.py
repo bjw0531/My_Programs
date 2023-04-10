@@ -14,13 +14,14 @@ from pygame.surface import Surface
 
 import variables as var
 
-
+pygame.init()
 bg = pygame.image.load('bg2.jpg')
 bg = pygame.transform.scale(bg, (var.BGX, var.BGY))
 screen = pygame.Surface((var.SURFACEX, var.SURFACEY))
-# screen.set_colorkey(var.BLACK)
-screen.blit(bg, (-var.SURFACEINITX + var.BX, -var.SURFACEINITY + var.BY))
+screen2 = pygame.Surface((var.SURFACEX, var.SURFACEY), pygame.SRCALPHA)
+font = pygame.font.SysFont("gulim", 30, True, True)
 pathlist = []
+pathnum = 0
 
 
 class path:
@@ -40,14 +41,28 @@ class path:
         self.color = col1
         self.outline_color = col2
 
-    def draw(self):
-        pygame.draw.rect(
-            screen, self.color, self.rect)
+        global pathnum
+        self.idx = pathnum
+        pathnum += 1
+
+    def draw(self, screen):
+        if (self.fpsset != 0):
+            pygame.draw.rect(
+                screen, var.GREEN, self.rect)
+        else:
+            pygame.draw.rect(
+                screen, self.color, self.rect)
+
         pygame.draw.rect(
             screen, self.outline_color, self.rect, 2)
 
     def getdirection(self):
         return self.direction
+
+    def drawidx(self, screen):
+        self.idxtext = font.render(str(self.idx), True, var.GRAY)
+        screen.blit(
+            self.idxtext, self.rect.topleft)
 
 
 def pathrect(idx):
@@ -98,9 +113,15 @@ def makepath(offset, direction, col1, col2):
 
 def make():
     for i in pathlist:
-        i.draw()
+        i.draw(screen)
     endpathidx = len(pathlist)
     return screen, endpathidx
+
+
+def makeidx():
+    for i in pathlist:
+        i.drawidx(screen2)
+    return screen2
 
 
 def get_path(idx):
@@ -116,6 +137,15 @@ def map2():
         path([var.SURFACEX / 2, var.SURFACEY / 2], 80, var.WHITE, var.BLACK, 1))
 
     pattern1 = [1, 1, 1, 1, 2, 2, 2, 2]
+    pattern2 = [4, 4, 4, 4, 4, 4, 4, 4]
+    pattern3 = [3, 3, 3, 3, 4, 4, 4, 4]
 
-    automake(pattern1+pattern1+pattern1 +
-             [1, 1, 1, 1, 1]+[4, 4, 4]+pattern1+pattern1+pattern1+[1, 1, 1, 1]+[4, 4, 4, 4]+[1, 1, 1, 1, 1, 1, 1, 1, 1])
+    automake(pattern1+pattern1+pattern1 + [1, 1, 1, 1, 1]+[4, 4, 4]+pattern1+pattern1+pattern1+[1, 1, 1, 1]+[4, 4, 4, 4] + [
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]+pattern2+pattern2+pattern2+pattern2+pattern3+pattern3+pattern3+[3, 3, 3, 3, 3, 2, 2, 2])
+    pathlist[0].fpsset = var.FPS
+    pathlist[65].fpsset = var.FPS / 4
+    pathlist[69].fpsset = var.FPS / 2
+    pathlist[73].fpsset = var.FPS
+
+    soundtrack = pygame.mixer.Sound("soundtracks\stg2.wav")
+    return soundtrack
