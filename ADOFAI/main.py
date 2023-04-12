@@ -16,7 +16,6 @@ import pygame.gfxdraw
 import variables as var
 import maps
 
-
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((var.BGX, var.BGY))
 degree = 0

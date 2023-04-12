@@ -63,6 +63,15 @@ class path:
         self.idxtext = font.render(str(self.idx), True, var.GRAY)
         screen.blit(
             self.idxtext, self.rect.topleft)
+        
+    def accuracyshow(self, type):   # 1 정확 2 보통 3 나쁨
+        if(type == 1):
+            text = "정확"
+        elif (type == 2):
+            text = "보통"
+        elif (type == 3):
+            text = "나쁨"
+        self.acctext = font.render()
 
 
 def pathrect(idx):
