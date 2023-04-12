@@ -147,5 +147,5 @@ def map2():
     pathlist[69].fpsset = var.FPS / 2
     pathlist[73].fpsset = var.FPS
 
-    soundtrack = pygame.mixer.Sound("soundtracks\stg2.wav")
+    soundtrack = "soundtracks\stg2-1.wav"
     return soundtrack

@@ -36,6 +36,11 @@ gameovertxt = font.render("Game Over", True, var.RED)
 gamecleartxt = font.render("Game Clear", True, var.GREEN)
 
 soundtrack = maps.map2()
+pygame.mixer.init(48000, -16, 1, 1024)
+pygame.mixer.music.set_volume(1)
+pygame.mixer.music.load(soundtrack)
+pygame.mixer.music.play()
+
 
 
 def getxy(degree, mode):
@@ -57,6 +62,8 @@ def colorchanger(col):
 
 def gameover(mode):
     replay = 0
+    if(mode == 0):
+        pygame.mixer.music.pause()
     while not replay:
         if mode == 0:   # game over
             screen.blit(
@@ -73,10 +80,14 @@ def gameover(mode):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     replay = False
-                    global nextpath, xoffset, yoffset
+                    global nextpath, xoffset, yoffset, degree
                     nextpath = 1
                     xoffset = 0
                     yoffset = 0
+                    degree = 0
+                    if(pygame.mixer.music.get_busy == False):
+                        pygame.mixer.music.pause()
+                    pygame.mixer.music.play()
                     if (maps.get_path(0).fpsset):
                         var.FPS = maps.get_path(0).fpsset
 
