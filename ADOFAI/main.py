@@ -29,11 +29,18 @@ bx, by = var.BX, var.BY
 key = ''
 pathlist = []
 standard = []
+col1 = var.RED
+col2 = var.BLUE
+nextpath = 1
+xoffset = 0
+yoffset = 0
+spinrect = Rect(0, 0, 0, 0)
+pathpos = Rect(0, 0, 0, 0)
+combo = 0
+degreecheck = 0
 
-font = pygame.font.SysFont("dotum", 60, True, True)
-font2 = pygame.font.SysFont("dotum", 25, False, True)
-gameovertxt = font.render("Game Over", True, var.RED)
-gamecleartxt = font.render("Game Clear", True, var.GREEN)
+gameovertxt = var.FONT60.render("Game Over", True, var.RED)
+gamecleartxt = var.FONT60.render("Game Clear", True, var.GREEN)
 
 soundtrack = maps.map2()
 pygame.mixer.init(48000, -16, 1, 1024)
@@ -61,35 +68,39 @@ def colorchanger(col):
 
 def gameover(mode):
     replay = 0
-    if (mode == 0):
+    if mode == 0:
         pygame.mixer.music.pause()
+        screen.blit(
+                gameovertxt, [var.BMIDX - gameovertxt.get_rect().centerx, var.BMIDY-200])
+        
+    if mode == 1:   # game clear
+        screen.blit(
+            gamecleartxt, [var.BMIDX - gamecleartxt.get_rect().centerx, var.BMIDY-200])
 
     while not replay:
-        if mode == 0:   # game over
-            screen.blit(
-                gameovertxt, [screen.get_rect().centerx - gameovertxt.get_rect().centerx, screen.get_rect().centery-200])
-        if mode == 1:   # game clear
-            screen.blit(
-                gamecleartxt, [screen.get_rect().centerx - gamecleartxt.get_rect().centerx, screen.get_rect().centery-200])
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                global run
                 run = False
                 replay = False
                 return
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
+                    global nextpath, xoffset, yoffset, degree, pathidxscreen,pathscreen, endpathidx, combo, degreecheck
                     replay = False
-                    global nextpath, xoffset, yoffset, degree, pathidxscreen,pathscreen, endpathidx
                     nextpath = 1
                     xoffset = 0
                     yoffset = 0
                     degree = 0
+                    degreecheck = 0
+                    combo = 0
                     if (pygame.mixer.music.get_busy == False):
                         pygame.mixer.music.pause()
                     pygame.mixer.music.play()
                     if (maps.get_path(0).fpsset):
                         var.MULTIPLIER = maps.get_path(0).fpsset
+                    screen.fill(var.BLACK)
                     pathidxscreen = maps.makeidx()
                     pathscreen, endpathidx = maps.make()
 
@@ -97,17 +108,8 @@ def gameover(mode):
 
         pygame.display.flip()
 
-
-col1 = var.RED
-col2 = var.BLUE
-nextpath = 1
-xoffset = 0
-yoffset = 0
-spinrect = Rect(0, 0, 0, 0)
-pathpos = Rect(0, 0, 0, 0)
 pathidxscreen = maps.makeidx()
 pathscreen, endpathidx = maps.make()
-
 
 while run:
     for event in pygame.event.get():
@@ -119,8 +121,8 @@ while run:
     # hit keyboard
     if key == userinput[0] or key == userinput[1]:
         direction = maps.get_path(nextpath).direction
-        intrsctrect = spinrect.colliderect(maps.midpoint(screen.get_rect().centerx, screen.get_rect().centery, direction))
-        intrsctrect = spinrect.clip(maps.midpoint(screen.get_rect().centerx, screen.get_rect().centery, direction))
+        intrsctrect = spinrect.colliderect(maps.midpoint(var.BMIDX, var.BMIDY, direction))
+        intrsctrect = spinrect.clip(maps.midpoint(var.BMIDX, var.BMIDY, direction))
         intrsctrect: pygame.Rect
         circlesize = var.RADIUS * var.RADIUS * math.pi
         tmppath = maps.get_path(nextpath)
@@ -128,7 +130,7 @@ while run:
 
         if direction > 0:
             pygame.draw.rect(screen, var.RED, maps.midpoint(
-                screen.get_rect().centerx, screen.get_rect().centery, direction))
+                var.BMIDX, var.BMIDY, direction))
             if not intrsctrect:
                 gameover(0)
                 flag = True
@@ -136,8 +138,13 @@ while run:
                 intrsctrect_size = intrsctrect.width * intrsctrect.height
                 if intrsctrect_size >= circlesize:
                     tmppath.accuracyshow(1)
-                else:
+                    combo += 1
+                elif intrsctrect_size >= circlesize / 1.5:
                     tmppath.accuracyshow(2)
+                    combo = 0
+                else:
+                    tmppath.accuracyshow(3)
+                    combo = 0
 
         # hit block
         if nextpath + 1 == endpathidx:
@@ -156,7 +163,7 @@ while run:
             col2 = colorchanger(col2)
             xoffset += tmppath.xoffset
             yoffset += tmppath.yoffset
-            if (tmppath.fpsset):
+            if tmppath.fpsset:
                 var.MULTIPLIER = tmppath.fpsset
             if tmppath.direction == 1:
                 degree = 0
@@ -167,7 +174,8 @@ while run:
             elif tmppath.direction == 4:
                 degree = 270
             nextpath += 1
-            
+            degreecheck = 0
+            combo_random = (random.randint(-10,10), random.randint(-10,10))
         else:
             flag = False
 
@@ -181,23 +189,55 @@ while run:
     screen.blit(pathidxscreen, (-((var.SURFACEX-var.BGX) / 2) +
                                 xoffset, -((var.SURFACEY-var.BGY) / 2)+yoffset))
 
-    spinrect = pygame.draw.circle(
-        screen, col1, [screen.get_rect().centerx + x, screen.get_rect().centery + y], var.RADIUS)
-    
-    # pygame.draw.rect(screen, col2, spinrect)
+    # 콤보 텍스트
+    if combo:
+        combocolor = list(var.YELLOW)
+        combocolor[1] -= combo * 3.5
 
+        combotxtboxcolor = list(var.SKYBLUE)
+        combotxtboxcolor[0] += combo * 3.5
+        combotxtboxcolor[2] -= combo * 3.5
+        
+        for i in range(0,3):
+            if(combocolor[i] < 0):
+                combocolor[i] = 0
+            if(combocolor[i] > 255):
+                combocolor[i] = 255
+            if(combotxtboxcolor[i] < 0):
+                combotxtboxcolor[i] = 0
+            if(combotxtboxcolor[i] > 255):
+                combotxtboxcolor[i] = 255
+
+        combotxt = var.FONT25.render(f"{combo} COMBO", True, tuple(combocolor))
+        combotxtbox = pygame.Rect(var.BMIDX + combo_random[0],
+                                  var.BMIDY + var.BMIDY * 2 / 3 + combo_random[1],
+                                  combotxt.get_rect().right,
+                                  combotxt.get_rect().bottom
+                                  )
+        pygame.draw.rect(screen, combotxtboxcolor, combotxtbox)
+        screen.blit(combotxt, combotxtbox.topleft)
+
+    spinrect = pygame.draw.circle(
+        screen, col1, [var.BMIDX + x, var.BMIDY + y], var.RADIUS)
+    
+    
     # 공 그리기
-    pygame.gfxdraw.aacircle(screen, screen.get_rect().centerx,
-                            screen.get_rect().centery, var.RADIUS, col2)
+    pygame.gfxdraw.aacircle(screen, var.BMIDX,
+                            var.BMIDY, var.RADIUS, col2)
     pygame.gfxdraw.filled_circle(
-        screen, screen.get_rect().centerx, screen.get_rect().centery, var.RADIUS, col2)
-    coord = font.render(
-        f"{640-xoffset}, {360-yoffset}", True, var.RED)
+        screen, var.BMIDX, var.BMIDY, var.RADIUS, col2)
+    coord = var.FONT60.render(
+        f"{var.BX-xoffset}, {var.BY-yoffset}", True, var.RED)
+    
+
 
     # rotation
     degree += 3
+    degreecheck += 3
     if degree * var.MULTIPLIER >= 360:
         degree = 0
+    if degreecheck * var.MULTIPLIER >= 360:
+        gameover(0)
 
     pygame.display.flip()
     clock.tick(var.FPS)

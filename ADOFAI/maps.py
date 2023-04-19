@@ -19,7 +19,6 @@ bg = pygame.image.load('bg2.jpg')
 bg = pygame.transform.scale(bg, (var.BGX, var.BGY))
 screen = pygame.Surface((var.SURFACEX, var.SURFACEY))
 screen2 = pygame.Surface((var.SURFACEX, var.SURFACEY), pygame.SRCALPHA)
-font = pygame.font.SysFont("gulim", 30, True, True)
 pathlist = []
 pathnum = 0
 
@@ -51,7 +50,7 @@ class path:
     def draw(self, screen):
         if (self.fpsset != 0):
             pygame.draw.rect(
-                screen, var.GREEN, self.rect)
+                screen, var.YELLOW, self.rect)
         else:
             pygame.draw.rect(
                 screen, self.color, self.rect)
@@ -63,25 +62,25 @@ class path:
         return self.direction
 
     def drawidx(self, screen):
-        self.idxtext = font.render(str(self.idx), True, var.GRAY)
+        self.idxtext = var.FONT30.render(str(self.idx), True, var.GRAY)
         screen.blit(
             self.idxtext, self.rect.topleft)
 
     def accuracyshow(self, type):   # 1 정확 2 보통 3 나쁨
         if (type == 1):
-            text = "정확"
+            text = "Great!"
             color = var.GREEN
         elif (type == 2):
-            text = "보통"
-            color = var.YELLOW
+            text = "Good"
+            color = var.BLUE
         elif (type == 3):
-            text = "나쁨"
+            text = "Bad"
             color = var.RED
         else:
             text = "?"
             color = var.GRAY
 
-        self.acctext = font.render(text, True, color)
+        self.acctext = var.FONT20.render(text, True, color)
         screen.blit(self.acctext, self.rect.topleft)
 
 def pathrect(idx):
@@ -151,7 +150,6 @@ def map2():
     #   4
     # 3 □ 1
     #   2
-    global pathlist
     screen.fill(var.BLACK)
     pathlist.append(
         path([var.SURFACEX / 2, var.SURFACEY / 2], 80, var.WHITE, var.BLACK, 1))
