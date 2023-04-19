@@ -28,6 +28,7 @@ x = 0
 bx, by = var.BX, var.BY
 key = ''
 pathlist = []
+standard = []
 
 font = pygame.font.SysFont("dotum", 60, True, True)
 font2 = pygame.font.SysFont("dotum", 25, False, True)
@@ -41,14 +42,13 @@ pygame.mixer.music.load(soundtrack)
 pygame.mixer.music.play()
 
 
-
 def getxy(degree, mode):
     if mode == 0:
-        x = -math.cos(math.radians(degree)) * var.DISTANCE
-        y = -math.sin(math.radians(degree)) * var.DISTANCE
+        x = -math.cos(math.radians(degree) * var.MULTIPLIER) * var.DISTANCE
+        y = -math.sin(math.radians(degree) * var.MULTIPLIER) * var.DISTANCE
     elif mode == 1:
-        x = -math.cos(math.radians(degree)) * var.DISTANCE
-        y = math.sin(math.radians(degree)) * var.DISTANCE
+        x = -math.cos(math.radians(degree) * var.MULTIPLIER) * var.DISTANCE
+        y = math.sin(math.radians(degree) * var.MULTIPLIER) * var.DISTANCE
     return [x, y]
 
 
@@ -61,8 +61,9 @@ def colorchanger(col):
 
 def gameover(mode):
     replay = 0
-    if(mode == 0):
+    if (mode == 0):
         pygame.mixer.music.pause()
+
     while not replay:
         if mode == 0:   # game over
             screen.blit(
@@ -79,16 +80,18 @@ def gameover(mode):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     replay = False
-                    global nextpath, xoffset, yoffset, degree
+                    global nextpath, xoffset, yoffset, degree, pathidxscreen,pathscreen, endpathidx
                     nextpath = 1
                     xoffset = 0
                     yoffset = 0
                     degree = 0
-                    if(pygame.mixer.music.get_busy == False):
+                    if (pygame.mixer.music.get_busy == False):
                         pygame.mixer.music.pause()
                     pygame.mixer.music.play()
                     if (maps.get_path(0).fpsset):
-                        var.FPS = maps.get_path(0).fpsset
+                        var.MULTIPLIER = maps.get_path(0).fpsset
+                    pathidxscreen = maps.makeidx()
+                    pathscreen, endpathidx = maps.make()
 
                     return
 
@@ -100,7 +103,6 @@ col2 = var.BLUE
 nextpath = 1
 xoffset = 0
 yoffset = 0
-# pathlist.append(path([var.BX, var.BY], 1, 1))
 spinrect = Rect(0, 0, 0, 0)
 pathpos = Rect(0, 0, 0, 0)
 pathidxscreen = maps.makeidx()
@@ -116,16 +118,26 @@ while run:
 
     # hit keyboard
     if key == userinput[0] or key == userinput[1]:
-
         direction = maps.get_path(nextpath).direction
+        intrsctrect = spinrect.colliderect(maps.midpoint(screen.get_rect().centerx, screen.get_rect().centery, direction))
+        intrsctrect = spinrect.clip(maps.midpoint(screen.get_rect().centerx, screen.get_rect().centery, direction))
+        intrsctrect: pygame.Rect
+        circlesize = var.RADIUS * var.RADIUS * math.pi
+        tmppath = maps.get_path(nextpath)
         flag = False
 
         if direction > 0:
             pygame.draw.rect(screen, var.RED, maps.midpoint(
                 screen.get_rect().centerx, screen.get_rect().centery, direction))
-            if not spinrect.colliderect(maps.midpoint(screen.get_rect().centerx, screen.get_rect().centery, direction)):
+            if not intrsctrect:
                 gameover(0)
                 flag = True
+            else:
+                intrsctrect_size = intrsctrect.width * intrsctrect.height
+                if intrsctrect_size >= circlesize:
+                    tmppath.accuracyshow(1)
+                else:
+                    tmppath.accuracyshow(2)
 
         # hit block
         if nextpath + 1 == endpathidx:
@@ -142,11 +154,10 @@ while run:
         if flag == False:
             col1 = colorchanger(col1)
             col2 = colorchanger(col2)
-            tmppath = maps.get_path(nextpath)
             xoffset += tmppath.xoffset
             yoffset += tmppath.yoffset
             if (tmppath.fpsset):
-                var.FPS = tmppath.fpsset
+                var.MULTIPLIER = tmppath.fpsset
             if tmppath.direction == 1:
                 degree = 0
             elif tmppath.direction == 2:
@@ -156,22 +167,24 @@ while run:
             elif tmppath.direction == 4:
                 degree = 270
             nextpath += 1
+            
         else:
             flag = False
 
-    # draw ball
+    # draw screen
     x, y = getxy(degree, mode)
     pathrect = maps.pathrect(nextpath)
 
     screen.blit(pathscreen, (-((var.SURFACEX-var.BGX) / 2) +
                 xoffset, -((var.SURFACEY-var.BGY) / 2)+yoffset))
+    
     screen.blit(pathidxscreen, (-((var.SURFACEX-var.BGX) / 2) +
                                 xoffset, -((var.SURFACEY-var.BGY) / 2)+yoffset))
 
     spinrect = pygame.draw.circle(
         screen, col1, [screen.get_rect().centerx + x, screen.get_rect().centery + y], var.RADIUS)
-
-    # pygame.draw.rect(screen, var.WHITE, spinrect)
+    
+    # pygame.draw.rect(screen, col2, spinrect)
 
     # 공 그리기
     pygame.gfxdraw.aacircle(screen, screen.get_rect().centerx,
@@ -180,11 +193,10 @@ while run:
         screen, screen.get_rect().centerx, screen.get_rect().centery, var.RADIUS, col2)
     coord = font.render(
         f"{640-xoffset}, {360-yoffset}", True, var.RED)
-    # screen.blit(coord, [screen.get_rect().centerx, screen.get_rect().centery])
 
     # rotation
     degree += 3
-    if degree >= 360:
+    if degree * var.MULTIPLIER >= 360:
         degree = 0
 
     pygame.display.flip()

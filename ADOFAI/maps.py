@@ -23,6 +23,9 @@ font = pygame.font.SysFont("gulim", 30, True, True)
 pathlist = []
 pathnum = 0
 
+def resetscreen():
+    screen.fill(var.BLACK)
+    screen2.fill(var.BLACK)
 
 class path:
     def __init__(self, start, offset, col1, col2, direction, fpsset=0):
@@ -63,16 +66,23 @@ class path:
         self.idxtext = font.render(str(self.idx), True, var.GRAY)
         screen.blit(
             self.idxtext, self.rect.topleft)
-        
+
     def accuracyshow(self, type):   # 1 정확 2 보통 3 나쁨
-        if(type == 1):
+        if (type == 1):
             text = "정확"
+            color = var.GREEN
         elif (type == 2):
             text = "보통"
+            color = var.YELLOW
         elif (type == 3):
             text = "나쁨"
-        self.acctext = font.render()
+            color = var.RED
+        else:
+            text = "?"
+            color = var.GRAY
 
+        self.acctext = font.render(text, True, color)
+        screen.blit(self.acctext, self.rect.topleft)
 
 def pathrect(idx):
     return pathlist[idx].rect
@@ -128,8 +138,8 @@ def make():
 
 
 def makeidx():
-    for i in pathlist:
-        i.drawidx(screen2)
+    # for i in pathlist:
+    #     i.drawidx(screen2)
     return screen2
 
 
@@ -142,6 +152,7 @@ def map2():
     # 3 □ 1
     #   2
     global pathlist
+    screen.fill(var.BLACK)
     pathlist.append(
         path([var.SURFACEX / 2, var.SURFACEY / 2], 80, var.WHITE, var.BLACK, 1))
 
@@ -151,10 +162,10 @@ def map2():
 
     automake(pattern1+pattern1+pattern1 + [1, 1, 1, 1, 1]+[4, 4, 4]+pattern1+pattern1+pattern1+[1, 1, 1, 1]+[4, 4, 4, 4] + [
              1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]+pattern2+pattern2+pattern2+pattern2+pattern3+pattern3+pattern3+[3, 3, 3, 3, 3, 2, 2, 2])
-    pathlist[0].fpsset = var.FPS
-    pathlist[65].fpsset = var.FPS / 4
-    pathlist[69].fpsset = var.FPS / 2
-    pathlist[73].fpsset = var.FPS
+    pathlist[0].fpsset = 1
+    pathlist[65].fpsset = 1 / 4
+    pathlist[69].fpsset = 1 / 2
+    pathlist[73].fpsset = 1
 
-    soundtrack = "soundtracks\stg2-1.wav"
+    soundtrack = "soundtracks\stg2.wav"
     return soundtrack
