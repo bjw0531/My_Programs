@@ -42,12 +42,14 @@ degreecheck = 0
 gameovertxt = var.FONT60.render("Game Over", True, var.RED)
 gamecleartxt = var.FONT60.render("Game Clear", True, var.GREEN)
 
-soundtrack = maps.map2()
+soundtrack = maps.btvirus()
 pygame.mixer.init(48000, -16, 1, 1024)
 pygame.mixer.music.set_volume(1)
 pygame.mixer.music.load(soundtrack)
 pygame.mixer.music.play()
 
+pathidxscreen = maps.makeidx()
+pathscreen, endpathidx = maps.make()
 
 def getxy(degree, mode):
     if mode == 0:
@@ -107,9 +109,6 @@ def gameover(mode):
                     return
 
         pygame.display.flip()
-
-pathidxscreen = maps.makeidx()
-pathscreen, endpathidx = maps.make()
 
 while run:
     for event in pygame.event.get():
@@ -209,11 +208,8 @@ while run:
                 combotxtboxcolor[i] = 255
 
         combotxt = var.FONT25.render(f"{combo} COMBO", True, tuple(combocolor))
-        combotxtbox = pygame.Rect(var.BMIDX + combo_random[0],
-                                  var.BMIDY + var.BMIDY * 2 / 3 + combo_random[1],
-                                  combotxt.get_rect().right,
-                                  combotxt.get_rect().bottom
-                                  )
+        combotxtbox = pygame.Rect(0,0, combotxt.get_rect().right, combotxt.get_rect().bottom)
+        combotxtbox.center = (var.BMIDX + combo_random[0], var.BMIDY + var.BMIDY * 2 / 3 + combo_random[1])
         pygame.draw.rect(screen, combotxtboxcolor, combotxtbox)
         screen.blit(combotxt, combotxtbox.topleft)
 
@@ -229,7 +225,14 @@ while run:
     coord = var.FONT60.render(
         f"{var.BX-xoffset}, {var.BY-yoffset}", True, var.RED)
     
-
+    pygame.draw.rect(screen, var.RED, maps.midpoint(
+                var.BMIDX, var.BMIDY, 4))
+    pygame.draw.rect(screen, var.RED, maps.midpoint(
+                var.BMIDX, var.BMIDY, 1))
+    pygame.draw.rect(screen, var.RED, maps.midpoint(
+                var.BMIDX, var.BMIDY, 2))
+    pygame.draw.rect(screen, var.RED, maps.midpoint(
+                var.BMIDX, var.BMIDY, 3))
 
     # rotation
     degree += 3

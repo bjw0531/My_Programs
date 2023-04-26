@@ -4,11 +4,13 @@ pygame.font.init()
 FPS = 160
 BX, BY = 640, 360
 DISTANCE = 80
-RADIUS = 30
+RADIUS = 20
 WIDTH = 100
 OFFSET = -80
-PATHW = RADIUS * 2 + 20
-PATHH = RADIUS * 2 + 20
+PATHW = 30 * 2 + 20
+PATHH = 30 * 2 + 20
+SUBPATHW = 60
+SUBPATHH = 60
 BGX = 1280
 BGY = 720
 SURFACEX = 22360
@@ -20,6 +22,7 @@ SURFACEMIDY = int(SURFACEY / 2)
 SURFACEINITX = -SURFACEX + BGX
 SURFACEINITY = -SURFACEY + BGY
 MULTIPLIER = 1
+
 FONT60 = pygame.font.SysFont("HY견고딕", 60, True, True)
 FONT30 = pygame.font.SysFont("HY견고딕", 30, True, True)
 FONT25 = pygame.font.SysFont("HY견고딕", 25, False, True)

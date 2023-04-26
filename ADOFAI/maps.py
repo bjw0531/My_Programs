@@ -1,10 +1,5 @@
-import math
-import os
 import random
-import sys
-import threading
-import time
-
+import librosa
 import pygame
 from pygame import camera
 from pygame.color import Color
@@ -15,16 +10,18 @@ from pygame.surface import Surface
 import variables as var
 
 pygame.init()
-bg = pygame.image.load('bg2.jpg')
+bg = pygame.image.load('./bg2.jpg')
 bg = pygame.transform.scale(bg, (var.BGX, var.BGY))
 screen = pygame.Surface((var.SURFACEX, var.SURFACEY))
 screen2 = pygame.Surface((var.SURFACEX, var.SURFACEY), pygame.SRCALPHA)
 pathlist = []
 pathnum = 0
 
+
 def resetscreen():
     screen.fill(var.BLACK)
     screen2.fill(var.BLACK)
+
 
 class path:
     def __init__(self, start, offset, col1, col2, direction, fpsset=0):
@@ -83,6 +80,7 @@ class path:
         self.acctext = var.FONT20.render(text, True, color)
         screen.blit(self.acctext, self.rect.topleft)
 
+
 def pathrect(idx):
     return pathlist[idx].rect
 
@@ -94,8 +92,7 @@ def midpoint(x, y, mode):
     rect = pygame.Rect(0, 0, 0, 0)
     rect.width = var.PATHW
     rect.height = var.PATHH
-    rect.centerx = x
-    rect.centery = y
+    rect.center = (x, y)
 
     if mode == 1:
         rect.centerx += var.PATHW
@@ -158,12 +155,35 @@ def map2():
     pattern2 = [4, 4, 4, 4, 4, 4, 4, 4]
     pattern3 = [3, 3, 3, 3, 4, 4, 4, 4]
 
-    automake(pattern1+pattern1+pattern1 + [1, 1, 1, 1, 1]+[4, 4, 4]+pattern1+pattern1+pattern1+[1, 1, 1, 1]+[4, 4, 4, 4] + [
-             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]+pattern2+pattern2+pattern2+pattern2+pattern3+pattern3+pattern3+[3, 3, 3, 3, 3, 2, 2, 2])
+    automake(pattern1+pattern1+pattern1 + [1, 1, 1, 1, 1] + [4, 4, 4] + pattern1 + pattern1 + pattern1 + [1, 1, 1, 1] + [4, 4, 4, 4] + [
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] + pattern2 + pattern2 + pattern2 + pattern2 + pattern3 + pattern3 + pattern3 + [3, 3, 3, 3, 3, 2, 2, 2])
     pathlist[0].fpsset = 1
     pathlist[65].fpsset = 1 / 4
     pathlist[69].fpsset = 1 / 2
     pathlist[73].fpsset = 1
 
-    soundtrack = "soundtracks\stg2.wav"
-    return soundtrack
+    filepath = "soundtracks\stg2.wav"
+    return filepath
+
+def btvirus():
+    filepath = "./soundtracks/Beethoven_Virus.wav"
+    screen.fill(var.WHITE)
+    pathlist.append(
+        path([var.SURFACEX / 2, var.SURFACEY / 2], 80, var.WHITE, var.BLACK, 1))
+    pattern1 = [1,1,1,1,1,1]
+
+
+    patternloop = [[4,3,2,1],
+                    [2,3,4,1]]
+    
+    automake(pattern1+pattern1+patternloop[random.randint(0,1)]+pattern1+pattern1+pattern1+patternloop[random.randint(0,1)]+pattern1+pattern1+patternloop[random.randint(0,1)]+pattern1+patternloop[random.randint(0,1)]+pattern1+patternloop[random.randint(0,1)]+pattern1+pattern1+patternloop[random.randint(0,1)]+pattern1+pattern1+pattern1+pattern1+pattern1+patternloop[random.randint(0,1)]+pattern1)
+    var.FPS = trackbeat(filepath,100)
+    return filepath
+
+def trackbeat(filepath, minimumbpm):
+    y, sr = librosa.load(filepath)
+    tempo , _ = librosa.beat.beat_track(y=y)
+    for i in range(1,10):
+        if int(tempo) * i >= minimumbpm:
+            return int(tempo) * i
+        
