@@ -8,6 +8,7 @@ from pygame.sprite import Sprite
 from pygame.surface import Surface
 
 import variables as var
+import copy
 
 pygame.init()
 bg = pygame.image.load('./bg2.jpg')
@@ -25,35 +26,49 @@ def resetscreen():
 
 class path:
     def __init__(self, start, offset, col1, col2, direction, fpsset=0):
+        # ─ │ ┌ ┐ └ ┘
+        # 1 2 3 4 5 6
         xoffsets = [0, offset, 0, -offset, 0]
         yoffsets = [0, 0, offset, 0, -offset]
         self.fpsset = fpsset
-        self.rect = pygame.Rect(0, 0, 0, 0)
-        self.subrect = pygame.Rect(0, 0, 0, 0)
-        self.direction = direction
-        self.rect.width = var.PATHW
-        self.rect.height = var.PATHH
-        self.rect.centerx = start[0]
-        self.rect.centery = start[1]
-        self.xoffset = xoffsets[direction]
-        self.yoffset = yoffsets[direction]
-        self.color = col1
-        self.outline_color = col2
 
         global pathnum
         self.idx = pathnum
         pathnum += 1
 
+        self.rect = pygame.Rect(0, 0, var.PATHW, var.PATHH)
+        self.rect.center = start
+
+        self.bridge1 = pygame.Rect(0,0,var.PATHW - var.MINIRECTW * 2, var.MINIRECTH)
+        self.bridge2 = pygame.Rect(0,0,var.PATHW - var.MINIRECTW * 2, var.MINIRECTH)
+        self.bridge1.center = start
+        self.bridge2.center = start
+
+        self.subrect = pygame.Rect(0, 0, var.SUBPATHW, var.SUBPATHH)
+        self.subrect.center = start
+        
+        mode = 3
+
+        self.direction = direction
+        self.xoffset = xoffsets[direction]
+        self.yoffset = yoffsets[direction]
+        self.color = col1
+        self.outline_color = col2
+
+
+
     def draw(self, screen):
         if (self.fpsset != 0):
             pygame.draw.rect(
-                screen, var.YELLOW, self.rect)
+                screen, var.YELLOW, self.subrect)
         else:
             pygame.draw.rect(
-                screen, self.color, self.rect)
+                screen, self.color, self.subrect)
 
-        pygame.draw.rect(
-            screen, self.outline_color, self.rect, 2)
+        pygame.draw.rect(screen, var.BLUE, self.bridge1)
+        pygame.draw.rect(screen, var.BLUE, self.bridge2)
+        # pygame.draw.rect(
+        #     screen, self.outline_color, self.subrect, 2)
 
     def getdirection(self):
         return self.direction
@@ -96,16 +111,18 @@ def midpoint(x, y, mode):
 
     if mode == 1:
         rect.centerx += var.PATHW
-        return rect
     elif mode == 2:
         rect.centery += var.PATHH
-        return rect
     elif mode == 3:
         rect.centerx -= var.PATHW
-        return rect
     elif mode == 4:
         rect.centery -= var.PATHH
-        return rect
+
+    subrect = copy.deepcopy(rect)
+    subrect.size = (var.SUBPATHW, var.SUBPATHH)
+    subrect.center = rect.center
+
+    return subrect
 
 
 def automake(l: list):
@@ -165,25 +182,26 @@ def map2():
     filepath = "soundtracks\stg2.wav"
     return filepath
 
+
 def btvirus():
     filepath = "./soundtracks/Beethoven_Virus.wav"
-    screen.fill(var.WHITE)
+    screen.fill(var.BLACK)
     pathlist.append(
         path([var.SURFACEX / 2, var.SURFACEY / 2], 80, var.WHITE, var.BLACK, 1))
-    pattern1 = [1,1,1,1,1,1]
+    pattern1 = [1, 1, 1, 1, 1, 1]
 
+    patternloop = [[4, 3, 2, 1],
+                   [2, 3, 4, 1]]
 
-    patternloop = [[4,3,2,1],
-                    [2,3,4,1]]
-    
-    automake(pattern1+pattern1+patternloop[random.randint(0,1)]+pattern1+pattern1+pattern1+patternloop[random.randint(0,1)]+pattern1+pattern1+patternloop[random.randint(0,1)]+pattern1+patternloop[random.randint(0,1)]+pattern1+patternloop[random.randint(0,1)]+pattern1+pattern1+patternloop[random.randint(0,1)]+pattern1+pattern1+pattern1+pattern1+pattern1+patternloop[random.randint(0,1)]+pattern1)
-    var.FPS = trackbeat(filepath,100)
+    automake(pattern1+pattern1+patternloop[random.randint(0, 1)]+pattern1+pattern1+pattern1+patternloop[random.randint(0, 1)]+pattern1+pattern1+patternloop[random.randint(0, 1)]+pattern1+patternloop[random.randint(
+        0, 1)]+pattern1+patternloop[random.randint(0, 1)]+pattern1+pattern1+patternloop[random.randint(0, 1)]+pattern1+pattern1+pattern1+pattern1+pattern1+patternloop[random.randint(0, 1)]+pattern1)
+    var.FPS = trackbeat(filepath, 100)
     return filepath
+
 
 def trackbeat(filepath, minimumbpm):
     y, sr = librosa.load(filepath)
-    tempo , _ = librosa.beat.beat_track(y=y)
-    for i in range(1,10):
+    tempo, _ = librosa.beat.beat_track(y=y)
+    for i in range(1, 10):
         if int(tempo) * i >= minimumbpm:
             return int(tempo) * i
-        

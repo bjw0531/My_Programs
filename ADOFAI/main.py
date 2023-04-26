@@ -135,7 +135,7 @@ while run:
                 flag = True
             else:
                 intrsctrect_size = intrsctrect.width * intrsctrect.height
-                if intrsctrect_size >= circlesize:
+                if intrsctrect_size >= circlesize / 1.2:
                     tmppath.accuracyshow(1)
                     combo += 1
                 elif intrsctrect_size >= circlesize / 1.5:
@@ -225,14 +225,14 @@ while run:
     coord = var.FONT60.render(
         f"{var.BX-xoffset}, {var.BY-yoffset}", True, var.RED)
     
-    pygame.draw.rect(screen, var.RED, maps.midpoint(
-                var.BMIDX, var.BMIDY, 4))
-    pygame.draw.rect(screen, var.RED, maps.midpoint(
-                var.BMIDX, var.BMIDY, 1))
-    pygame.draw.rect(screen, var.RED, maps.midpoint(
-                var.BMIDX, var.BMIDY, 2))
-    pygame.draw.rect(screen, var.RED, maps.midpoint(
-                var.BMIDX, var.BMIDY, 3))
+    # pygame.draw.rect(screen, var.RED, maps.midpoint(
+    #             var.BMIDX, var.BMIDY, 1))
+    # pygame.draw.rect(screen, var.RED, maps.midpoint(
+    #             var.BMIDX, var.BMIDY, 2))
+    # pygame.draw.rect(screen, var.RED, maps.midpoint(
+    #             var.BMIDX, var.BMIDY, 3))
+    # pygame.draw.rect(screen, var.RED, maps.midpoint(
+    #             var.BMIDX, var.BMIDY, 4))
 
     # rotation
     degree += 3
