@@ -1,0 +1,5 @@
+﻿  main.cpp
+C:\Users\itisf\Documents\Code\CProject\functions.h(11,21): warning C4838: 'int'에서 'SHORT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\itisf\Documents\Code\CProject\functions.h(11,26): warning C4838: 'int'에서 'SHORT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\itisf\Documents\Code\CProject\functions.h(26,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  CProject.vcxproj -> C:\Users\itisf\Documents\Code\CProject\Debug\CProject.exe
